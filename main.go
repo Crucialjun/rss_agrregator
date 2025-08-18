@@ -48,22 +48,11 @@ func main() {
 		)
 	}
 
-	queries, err := database.New(conn)
-	if err != nil {
-		log.Fatal(
-			"Failed to create database queries:",
-			err,
-		)
-	}
-
-
+	queries := database.New(conn)
 
 	apiCfg := apiConfig{
 		DB: queries,
-	
 	}
-
-
 
 	router := chi.NewRouter()
 
@@ -76,21 +65,21 @@ func main() {
 		MaxAge:           300, // Maximum value not ignored by any of major browsers
 	}))
 
-	
-
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/err", handlerError)
 	v1Router.Post("/users", apiCfg.handleCreateUser)
+
+	router.Mount("/v1", v1Router)
 
 	server := &http.Server{
 		Addr:    ":" + portString,
 		Handler: router,
 	}
 
-	err := server.ListenAndServe()
-
 	log.Println("Starting server on port:", portString)
+
+	err = server.ListenAndServe()
 
 	if err != nil {
 		log.Fatal(err)
