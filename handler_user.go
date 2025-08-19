@@ -19,10 +19,17 @@ func (apiCfg *apiConfig) handleCreateUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
+	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		Name:  params.Name,
 		Email: params.Email,
 	})
 
-	respondWithJson(w, http.StatusCreated, map[string]string{"status": "user created"})
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	data := databaseUserToUser(user)
+
+	respondWithJson(w, http.StatusCreated, data)
 }

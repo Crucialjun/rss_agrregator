@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users (id, created_at, updated_at, email, name)
-VALUES (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2)
+INSERT INTO users (id, created_at, updated_at, email, name, api_key)
+VALUES (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2, encode(sha256(random()::text::bytea), 'hex'))
 RETURNING *;
 
 -- name: GetUser :one

@@ -12,9 +12,9 @@ import (
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, created_at, updated_at, email, name)
-VALUES (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2)
-RETURNING id, created_at, updated_at, email, name
+INSERT INTO users (id, created_at, updated_at, email, name, api_key)
+VALUES (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2, encode(sha256(random()::text::bytea), 'hex'))
+RETURNING id, created_at, updated_at, email, name, api_key
 `
 
 type CreateUserParams struct {
@@ -31,13 +31,14 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Name,
+		&i.ApiKey,
 	)
 	return i, err
 }
 
 const deleteUser = `-- name: DeleteUser :one
 DELETE FROM users WHERE id = $1
-RETURNING id, created_at, updated_at, email, name
+RETURNING id, created_at, updated_at, email, name, api_key
 `
 
 func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -49,12 +50,13 @@ func (q *Queries) DeleteUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Name,
+		&i.ApiKey,
 	)
 	return i, err
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, created_at, updated_at, email, name FROM users WHERE id = $1
+SELECT id, created_at, updated_at, email, name, api_key FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
@@ -66,13 +68,14 @@ func (q *Queries) GetUser(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Name,
+		&i.ApiKey,
 	)
 	return i, err
 }
 
 const updateUser = `-- name: UpdateUser :one
 UPDATE users SET email = $1, name = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3
-RETURNING id, created_at, updated_at, email, name
+RETURNING id, created_at, updated_at, email, name, api_key
 `
 
 type UpdateUserParams struct {
@@ -90,6 +93,7 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 		&i.UpdatedAt,
 		&i.Email,
 		&i.Name,
+		&i.ApiKey,
 	)
 	return i, err
 }
