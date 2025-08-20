@@ -4,7 +4,7 @@ VALUES (gen_random_uuid(), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, $1, $2, encode(
 RETURNING *;
 
 -- name: GetUser :one
-SELECT * FROM users WHERE id = $1;
+SELECT * FROM users WHERE api_key = $1;
 
 -- name: UpdateUser :one
 UPDATE users SET email = $1, name = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3
